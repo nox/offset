@@ -2,6 +2,8 @@
 //!
 //! Why write `foo.bar`, when you could write `Foo::bar_offset().index_in(foo)`?
 
+#![no_std]
+
 use core::cmp::Ordering;
 use core::fmt;
 use core::hash::{Hash, Hasher};
