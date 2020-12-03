@@ -1,6 +1,6 @@
 //! # Glorified offsets for arbitrary structures
 //!
-//! Why write `foo.bar`, when you could write `Foo::bar_offset().index_in(foo)`?
+//! Why write `foo.bar`, when you could write `offset_of!(<Foo>::bar).index_in(foo)`?
 
 #![no_std]
 
@@ -25,6 +25,73 @@ pub struct Offset<Base, Field> {
 }
 unsafe impl<Base, Field> Send for Offset<Base, Field> {}
 unsafe impl<Base, Field> Sync for Offset<Base, Field> {}
+
+/// Returns a pointer to a field of a base pointer.
+///
+/// The syntax is `field_ptr(base_ptr.field)` where both `base_ptr` and
+/// `field` are idents.
+#[macro_export]
+macro_rules! field_ptr {
+    ($base_ptr:ident.$field:ident) => {
+        // The only valid pointer cast from &T is *const T, so this is always
+        // a const pointer to the field type exactly.
+        &(*$base_ptr).$field as *const _
+    };
+}
+
+/// Constructs an offset from a type and a field name.
+///
+/// The syntax is `offset_of!(<Type>::field)`.
+///
+/// ## Example
+///
+/// ```
+/// struct Hello {
+///     message: &'static str,
+/// }
+///
+/// let hello = Hello {
+///     message: "hello world!",
+/// };
+///
+/// assert!(hello.message == *offset::offset_of!(<Hello>::message).index_in(&hello));
+/// ```
+#[macro_export]
+macro_rules! offset_of {
+    (<$ty:path>::$field:ident) => {{
+        // This lets us rely on type inference to retrieve the type of the field.
+        #[inline(always)]
+        const unsafe fn offset<Field>(
+            value: u32,
+            _ptr: *const Field,
+        ) -> $crate::Offset<$ty, Field> {
+            $crate::Offset::new_unchecked(value)
+        }
+
+        #[allow(unused_unsafe)]
+        {
+            unsafe {
+                // This asserts that $ty indeed has a field named $field, to be
+                // sure we aren't looking at a field of a Deref target.
+                //
+                // A closure is required to do this because $ty might depend on
+                // type parameters from the environment in which this macro
+                // was used.
+                let _ = |value: &$ty| {
+                    let $ty { $field: _, .. } = *value;
+                };
+
+                let uninit = <core::mem::MaybeUninit<$ty>>::uninit();
+                let base_ptr = uninit.as_ptr();
+                let field_ptr = $crate::field_ptr!(base_ptr.$field);
+                offset(
+                    (field_ptr as *const u8).offset_from(base_ptr as *const u8) as u32,
+                    field_ptr,
+                )
+            }
+        }
+    }};
+}
 
 impl<Base, Field> Offset<Base, Field> {
     /// Creates a new arbitrary offset.
