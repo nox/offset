@@ -1,0 +1,19 @@
+[package]
+name = "offset"
+version = "0.1.0" # update documentation link on bump
+authors = ["Anthony Ramine <nox@nox.paris>"]
+edition = "2018"
+description = "Glorified offsets for arbitrary structures"
+documentation = "https://docs.rs/offset/0.1.0/"
+repository = "https://github.com/nox/offset"
+license = "Apache-2.0 OR MIT"
+readme = "README.md"
+
+keywords = [
+    "memory",
+]
+
+categories = [
+    "data-structures",
+    "no-std",
+]
