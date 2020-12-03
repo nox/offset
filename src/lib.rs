@@ -72,6 +72,7 @@ macro_rules! offset_of {
             $crate::Offset::new_unchecked(value)
         }
 
+        #[allow(unsafe_code)]
         #[allow(unused_unsafe)]
         {
             unsafe {
