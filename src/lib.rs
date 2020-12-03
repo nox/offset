@@ -61,10 +61,10 @@ macro_rules! offset_of {
     (<$ty:path>::$field:ident) => {{
         // This lets us rely on type inference to retrieve the type of the field.
         #[inline(always)]
-        const unsafe fn offset<Field>(
+        const unsafe fn offset<Base, Field>(
             value: u32,
             _ptr: *const Field,
-        ) -> $crate::Offset<$ty, Field> {
+        ) -> $crate::Offset<Base, Field> {
             $crate::Offset::new_unchecked(value)
         }
 
@@ -84,7 +84,7 @@ macro_rules! offset_of {
                 let uninit = <core::mem::MaybeUninit<$ty>>::uninit();
                 let base_ptr = uninit.as_ptr();
                 let field_ptr = $crate::field_ptr!(base_ptr.$field);
-                offset(
+                offset::<$ty, _>(
                     (field_ptr as *const u8).offset_from(base_ptr as *const u8) as u32,
                     field_ptr,
                 )
