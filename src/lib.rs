@@ -41,7 +41,8 @@ macro_rules! field_ptr {
 
 /// Constructs an offset from a type and a field name.
 ///
-/// The syntax is `offset_of!(<Type>::field)`.
+/// The syntax is `offset_of!(Type::field)` where `Type` is either an ident or
+/// a path in angle brackets.
 ///
 /// ## Example
 ///
@@ -54,10 +55,13 @@ macro_rules! field_ptr {
 ///     message: "hello world!",
 /// };
 ///
-/// assert!(hello.message == *offset::offset_of!(<Hello>::message).index_in(&hello));
+/// assert!(hello.message == *offset::offset_of!(Hello::message).index_in(&hello));
 /// ```
 #[macro_export]
 macro_rules! offset_of {
+    ($ty:ident::$field:ident) => {
+        $crate::offset_of!(<$ty>::$field)
+    };
     (<$ty:path>::$field:ident) => {{
         // This lets us rely on type inference to retrieve the type of the field.
         #[inline(always)]
