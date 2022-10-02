@@ -1,6 +1,7 @@
 //! # Glorified offsets for arbitrary structures
 //!
-//! Why write `foo.bar`, when you could write `offset_of!(<Foo>::bar).index_in(foo)`?
+//! Why write `foo.bar`, when you could write
+//! `offset_of!(<Foo>::bar).index_in(foo)`?
 
 #![no_std]
 
@@ -13,11 +14,12 @@ use core::ops::Add;
 
 /// An offset, representing a value of type `Field` into a value of type `Base`.
 ///
-/// The value of the offset is internally stored as an `u32`, so you are on your
-/// own if you try to use that crate with a struct larger than 4 GiB.
+/// The value of the offset is internally stored as an [`u32`], so you are on
+/// your own if you try to use that crate with a struct larger than 4 GiB.
 ///
 /// Offsets can be added together as long as their types correspond, i.e. it is
-/// possible to add an `Offset<B, C>` to an `Offset<A, B>` to get an `Offset<A, C>`.
+/// possible to add an `Offset<B, C>` to an `Offset<A, B>` to get an
+/// `Offset<A, C>`.
 #[repr(transparent)]
 pub struct Offset<Base, Field> {
     value: u32,
