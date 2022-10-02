@@ -121,6 +121,14 @@ impl<Base, Field> Offset<Base, Field> {
         }
     }
 
+    /// Returns the offset as an [`u32`].
+    ///
+    /// This method provides the same functionality as `From<Self>` for [`u32`]
+    /// but is usable in `const` code.
+    pub const fn as_u32(self) -> u32 {
+        self.value
+    }
+
     /// Returns a reference to the value of type `Field` in `base` at this offset.
     #[inline(always)]
     pub fn index_in(self, base: &Base) -> &Field {
